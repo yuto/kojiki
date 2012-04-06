@@ -1,0 +1,20 @@
+﻿{
+	"name"				: "乞食速報Extension",
+	"version"			: "0.1",
+	"description"			: "ニュー速(嫌儲)から乞食速報を抽出してお知らせ",
+	"background_page"		: "poll.html",
+	"icons" : {
+		"16"			: "icon.png",
+		"48"			: "notify.png"
+	},
+	"browser_action": {
+		"default_title"		: "乞食速報",
+		"default_icon"		: "icon.png",
+		"popup"			: "popup.html"
+	},
+	"permissions": [
+		"tabs",
+		"notifications",
+		"http://*.2ch.net/"
+ 	]
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="Shift_JIS" />
+<script type="text/javascript">
+var BBS_URI = 'http://engawa.2ch.net/poverty/'
+var MAX_COUNT_SIZE = 9999;
+var INTERVAL_S = 1000 * 60; // 1 minute
+var INTERVAL_E = 1000 * 60 * 5; // 5 minutes
+var COLOR_S = [050, 150, 050, 230];
+var COLOR_E = [200, 050, 050, 230];
+
+var update = function(count) {
+	if (count > MAX_COUNT_SIZE) {
+		count = MAX_COUNT_SIZE;
+	}
+	chrome.browserAction.setBadgeText({text : count});
+};
+
+var notify = function(title, body) {
+	var notification = webkitNotifications.createNotification(
+		'notify.png',
+		title,
+		body
+        );
+        notification.show();
+    }
+
+
+var check = function() {
+	var count;
+	var subback = new XMLHttpRequest();
+	var uri = BBS_URI + 'subback.html';
+	subback.open('GET', uri, true);
+	subback.onload = function(){
+		count = 0;
+		var lines = subback.responseText.split("\n");
+		for (var i = 0; i < lines.length; i ++) {
+			if (lines[i].match(/乞食/g) ) {
+				count ++;
+				if (lines[i].match(/<a href="(\d+)\/l50">\d+:\s(.+)\s\(\d+\)<\/a>$/gm) ) {
+					if (localStorage.kojikiLastThreadTime < RegExp.$1 || localStorage.kojikiLastThreadTime == undefined) {
+						localStorage.kojikiLastThreadTime = RegExp.$1;
+						notify('乞食速報', RegExp.$2);
+						//document.write( '<li><a href="' + BBS_CGI + RegExp.$1 + '/1" target=_blank>' + RegExp.$2 + '</a></li>' );
+					}
+				}
+			}
+		}
+		if (count >= 0) {
+			chrome.browserAction.setBadgeBackgroundColor({color : COLOR_S});
+			update(count.toString());
+			setTimeout(check, INTERVAL_S);
+		} else {
+			error();
+		}
+	};
+	subback.onerror = function(){
+		error();
+	};
+	subback.send(null);
+};
+
+var error = function() {
+	chrome.browserAction.setBadgeBackgroundColor({color : COLOR_E});
+	update('!');
+	setTimeout(check, INTERVAL_E);
+};
+
+chrome.browserAction.setBadgeText({text : '?'});
+chrome.browserAction.setBadgeBackgroundColor({color : COLOR_E});
+
+init = function(){
+	check();
+};
+</script>
+</head>
+<body onload="init();">
+</body>
+</html>

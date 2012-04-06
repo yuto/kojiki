@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+<!--
+body {
+	width: 300px;
+}
+-->
+</style>
+<meta charset="Shift_JIS" />
+<script type="text/javascript">
+var BBS_URI = 'http://engawa.2ch.net/poverty/';
+var BBS_CGI = 'http://engawa.2ch.net/test/read.cgi/poverty/';
+var COLOR_S = [050, 150, 050, 230];
+var COLOR_E = [200, 050, 050, 230];
+
+var getDate = function(epochSec){
+	var dates = new Array(6);
+	var d = new Date();
+	d.setTime(epochSec * 1000);
+	dates[0] = d.getYear();
+	if (dates[0] < 1900) {
+		dates[0] += 1900;
+	}
+	dates[1] = d.getMonth() + 1;
+	dates[2] = d.getDate();
+	dates[3] = d.getHours();
+	dates[4] = d.getMinutes();
+	dates[5] = d.getSeconds();
+	for (var count = 3; count < 6; count ++) {
+		if (dates[count] < 10) {
+			dates[count] = "0" + dates[count];
+		}
+	}
+	return dates;
+}
+
+var check = function() {
+	var line;
+	var popupContent;
+	var subback = new XMLHttpRequest();
+	var uri = BBS_URI + 'subback.html';
+	subback.open('GET', uri, true);
+	subback.onload = function(){
+		document.write( '<body style="width:700px">' );
+		var lines = subback.responseText.split("\n");
+		lines.sort();
+		lines.reverse();
+		for (var i = 0; i < lines.length; i ++) {
+			if (lines[i].match(/乞食/g)) {
+				if (lines[i].match(/<a href="(\d+)\/l50">\d+:\s(.+)\s\(\d+\)<\/a>$/gm) ) {
+					var date = getDate(RegExp.$1);
+					var dateString = date[1] + "/" + date[2] + " " + date[3] + ":" + date[4];
+					document.write( '[' + dateString + '] <a href="' + BBS_CGI + RegExp.$1 + '/1" target=_blank>' + RegExp.$2 + '</a><br>' );
+				}
+			}
+		}
+	};
+	subback.send(null);
+};
+</script>
+</head>
+<body onload="check();">
+乞食情報を検索中...
+</body>
+</html>
